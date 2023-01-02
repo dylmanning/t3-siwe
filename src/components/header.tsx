@@ -1,12 +1,12 @@
-import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useDisconnect } from "wagmi";
+import useLocalSession from "../hooks/useLocalSession";
 
 // The approach used in this component shows how to build a sign in and sign out
 // component that works on pages which support both client and server side
 // rendering, and avoids any flash incorrect content on initial page load.
 export default function Header() {
-  const { data: session, status } = useSession();
+  const { session, status, endSession } = useLocalSession();
   const loading = status === "loading";
   const { disconnect } = useDisconnect();
   return (
@@ -29,10 +29,10 @@ export default function Header() {
                   <img
                     src={session.user.image}
                     alt={session.user.name ? session.user.name : "username"}
-                    className="inline-block"
+                    className="inline-block w-[40px] rounded-full p-1"
                   />
                 )}
-                <span className="flex flex-col px-5">
+                <span className="flex flex-col px-2">
                   <small>Signed in as</small>
                   <strong>{session.user.email ?? session.user.name}</strong>
                 </span>
@@ -43,7 +43,7 @@ export default function Header() {
                 onClick={(e) => {
                   e.preventDefault();
                   disconnect();
-                  signOut();
+                  endSession();
                 }}
               >
                 Sign out

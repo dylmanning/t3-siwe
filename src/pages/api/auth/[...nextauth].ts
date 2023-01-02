@@ -8,10 +8,12 @@ import {
   type FetchEnsNameArgs,
   type FetchEnsAvatarArgs,
 } from "@wagmi/core";
+import Jazzicon from "@raugfer/jazzicon";
 import { type IncomingMessage } from "http";
 
 import { env } from "../../../env/server.mjs";
 
+// TODO: disable pages
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
@@ -21,15 +23,16 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       // TODO: anticipate empty token... what is the token etc
       if (session.user && token.sub) {
-        const address = {
-          address: token.sub,
-        };
         session.user.address = token.sub;
         session.user.name =
-          (await fetchEnsName(address as FetchEnsNameArgs)) || token.sub;
+          (await fetchEnsName({ address: token.sub } as FetchEnsNameArgs)) ||
+          token.sub;
         session.user.image =
-          (await fetchEnsAvatar(address as FetchEnsAvatarArgs)) ||
-          "https://via.placeholder.com/60";
+          (await fetchEnsAvatar({
+            address: token.sub,
+          } as FetchEnsAvatarArgs)) ||
+          "data:image/svg+xml;base64," +
+            Buffer.from(Jazzicon(token.sub), "utf8").toString("base64");
       }
       return session;
     },

@@ -1,17 +1,19 @@
 import { type GetServerSidePropsContext, type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
+import { getCsrfToken, signIn } from "next-auth/react";
 import { SiweMessage } from "siwe";
 import { useAccount, useConnect, useNetwork, useSignMessage } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
+import { watchAccount } from "@wagmi/core";
 
 import { trpc } from "../utils/trpc";
 import { useEffect } from "react";
 import Header from "../components/header";
+import useLocalSession from "../hooks/useLocalSession";
 
 const Home: NextPage = () => {
-  const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
+  // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
 
   return (
     <>
@@ -51,9 +53,9 @@ const Home: NextPage = () => {
             </Link>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <p className="text-2xl text-white">
+            {/* <p className="text-2xl text-white">
               {hello.data ? hello.data.greeting : "Loading tRPC query..."}
-            </p>
+            </p> */}
             <AuthShowcase />
           </div>
         </div>
@@ -71,9 +73,11 @@ const AuthShowcase: React.FC = () => {
   const { connect } = useConnect({
     connector: new InjectedConnector(),
   });
-  const { data: session, status } = useSession();
+  const { session: localSession, status } = useLocalSession();
+  const unwatch = watchAccount((account) => console.log(account));
 
   const handleLogin = async () => {
+    console.log("calling handleLogin");
     try {
       const callbackUrl = "/protected";
       const message = new SiweMessage({
@@ -100,21 +104,23 @@ const AuthShowcase: React.FC = () => {
   };
 
   useEffect(() => {
-    if (isConnected && !session) {
-      handleLogin();
+    if (status !== "loading") {
+      if (isConnected && status === "unauthenticated") {
+        handleLogin();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isConnected]);
+  }, [isConnected, status]);
 
   const { data: secretMessage } = trpc.auth.getSecretMessage.useQuery(
     undefined, // no input
-    { enabled: session?.user !== undefined }
+    { enabled: localSession?.user !== undefined }
   );
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <p className="text-center text-2xl text-white">
-        {session && <span>Logged in as {session.user?.name}</span>}
+        {localSession && <span>Logged in as {localSession.user?.name}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
       </p>
       <button
@@ -122,13 +128,15 @@ const AuthShowcase: React.FC = () => {
         onClick={(e) => {
           e.preventDefault();
           if (!isConnected) {
+            console.log("connect");
             connect();
           } else {
+            console.log("handleLogin");
             handleLogin();
           }
         }}
       >
-        {session ? "Sign out" : "Sign in"}
+        {localSession ? "Sign out" : "Sign in"}
       </button>
     </div>
   );

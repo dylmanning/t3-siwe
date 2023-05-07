@@ -4,9 +4,10 @@ import { SessionProvider } from "next-auth/react";
 import { WagmiConfig, createClient, configureChains } from "wagmi";
 import { mainnet, goerli } from "wagmi/chains";
 import { publicProvider } from "wagmi/providers/public";
-import { trpc } from "../utils/trpc";
 
-import "../styles/globals.css";
+import { api } from "y/utils/api";
+
+import "y/styles/globals.css";
 
 export const { chains, provider } = configureChains(
   [mainnet, goerli],
@@ -31,4 +32,4 @@ const MyApp: AppType<{ session: Session | null }> = ({
   );
 };
 
-export default trpc.withTRPC(MyApp);
+export default api.withTRPC(MyApp);

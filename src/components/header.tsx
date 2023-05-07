@@ -7,7 +7,7 @@ import useLocalSession from "../hooks/useLocalSession";
 // rendering, and avoids any flash incorrect content on initial page load.
 export default function Header() {
   const { session, status, endSession } = useLocalSession();
-  const loading = status === "loading";
+  // const loading = status === "loading";
   const { disconnect } = useDisconnect();
   return (
     <header className="absolute w-full text-white">
@@ -17,7 +17,7 @@ export default function Header() {
       <div>
         <div>
           {!session && (
-            <div className="pt-5 pl-5">
+            <div className="pl-5 pt-5">
               <span>You are not signed in</span>
             </div>
           )}
@@ -43,7 +43,7 @@ export default function Header() {
                 onClick={(e) => {
                   e.preventDefault();
                   disconnect();
-                  endSession();
+                  void endSession();
                 }}
               >
                 Sign out

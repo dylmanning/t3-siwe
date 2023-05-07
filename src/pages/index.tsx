@@ -1,19 +1,18 @@
-import { type GetServerSidePropsContext, type NextPage } from "next";
+import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
+import { useEffect } from "react";
 import { getCsrfToken, signIn } from "next-auth/react";
-import { SiweMessage } from "siwe";
 import { useAccount, useConnect, useNetwork, useSignMessage } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
-import { watchAccount } from "@wagmi/core";
+import { SiweMessage } from "siwe";
 
-import { trpc } from "../utils/trpc";
-import { useEffect } from "react";
-import Header from "../components/header";
-import useLocalSession from "../hooks/useLocalSession";
+import { api } from "y/utils/api";
+import useLocalSession from "y/hooks/useLocalSession";
+import Header from "y/components/header";
 
 const Home: NextPage = () => {
-  // const hello = trpc.example.hello.useQuery({ text: "from tRPC" });
+  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
 
   return (
     <>
@@ -74,10 +73,8 @@ const AuthShowcase: React.FC = () => {
     connector: new InjectedConnector(),
   });
   const { session: localSession, status } = useLocalSession();
-  const unwatch = watchAccount((account) => console.log(account));
 
   const handleLogin = async () => {
-    console.log("calling handleLogin");
     try {
       const callbackUrl = "/protected";
       const message = new SiweMessage({
@@ -92,7 +89,7 @@ const AuthShowcase: React.FC = () => {
       const signature = await signMessageAsync({
         message: message.prepareMessage(),
       });
-      signIn("credentials", {
+      await signIn("credentials", {
         message: JSON.stringify(message),
         redirect: false,
         signature,
@@ -106,13 +103,13 @@ const AuthShowcase: React.FC = () => {
   useEffect(() => {
     if (status !== "loading") {
       if (isConnected && status === "unauthenticated") {
-        handleLogin();
+        void handleLogin();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isConnected, status]);
 
-  const { data: secretMessage } = trpc.auth.getSecretMessage.useQuery(
+  const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
     { enabled: localSession?.user !== undefined }
   );
@@ -123,29 +120,23 @@ const AuthShowcase: React.FC = () => {
         {localSession && <span>Logged in as {localSession.user?.name}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
       </p>
-      <button
-        className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={(e) => {
-          e.preventDefault();
-          if (!isConnected) {
-            console.log("connect");
-            connect();
-          } else {
-            console.log("handleLogin");
-            handleLogin();
-          }
-        }}
-      >
-        {localSession ? "Sign out" : "Sign in"}
-      </button>
+      {!localSession && (
+        <button
+          className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
+          onClick={(e) => {
+            e.preventDefault();
+            if (!isConnected) {
+              console.log("connect");
+              connect();
+            } else {
+              console.log("handleLogin");
+              void handleLogin();
+            }
+          }}
+        >
+          Sign in
+        </button>
+      )}
     </div>
   );
 };
-
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  return {
-    props: {
-      csrfToken: await getCsrfToken(context),
-    },
-  };
-}

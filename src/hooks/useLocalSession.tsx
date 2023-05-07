@@ -8,7 +8,7 @@ export default function useLocalSession() {
 
   useEffect(() => {
     const stored = localStorage.getItem("session");
-    setSession(stored ? JSON.parse(stored) : null);
+    setSession(stored ? (JSON.parse(stored) as Session) : null);
   }, []);
 
   useEffect(() => {
@@ -18,9 +18,9 @@ export default function useLocalSession() {
     }
   }, [data]);
 
-  const endSession = () => {
+  const endSession = async () => {
     localStorage.removeItem("session");
-    signOut();
+    await signOut();
   };
 
   return { session, status, endSession };

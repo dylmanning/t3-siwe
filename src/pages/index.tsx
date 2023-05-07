@@ -102,8 +102,8 @@ const AuthShowcase: React.FC = () => {
 
   useEffect(() => {
     if (status !== "loading") {
-      if (isConnected && status === "unauthenticated") {
-        void handleLogin();
+      if (!isConnected) {
+        connect();
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -125,13 +125,7 @@ const AuthShowcase: React.FC = () => {
           className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
           onClick={(e) => {
             e.preventDefault();
-            if (!isConnected) {
-              console.log("connect");
-              connect();
-            } else {
-              console.log("handleLogin");
-              void handleLogin();
-            }
+            void handleLogin();
           }}
         >
           Sign in

@@ -34,7 +34,10 @@ export default function Header() {
                 )}
                 <span className="flex flex-col px-2">
                   <small>Signed in as</small>
-                  <strong>{session.user.email ?? session.user.name}</strong>
+                  <strong>
+                    {session.user.address &&
+                      session.user.address.slice(0, 6) + "..."}
+                  </strong>
                 </span>
               </span>
               <button

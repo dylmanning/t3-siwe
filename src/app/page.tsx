@@ -115,8 +115,6 @@ function CrudShowcase() {
   const { data: session } = useSession();
   const { data: latestPost } = api.post.getLatest.useQuery();
 
-  console.log(latestPost);
-
   if (!session?.user) return null;
 
   return (

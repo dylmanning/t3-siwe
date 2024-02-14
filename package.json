@@ -1,7 +1,8 @@
 {
-  "name": "t3-siwe",
-  "version": "0.2.0",
+  "name": "ts-siwe",
+  "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "dev": "next dev",
@@ -9,41 +10,41 @@
     "start": "next start"
   },
   "dependencies": {
+    "@feelsgoodman/siwviem": "^1.3.0",
     "@raugfer/jazzicon": "^1.0.6",
-    "@t3-oss/env-nextjs": "^0.2.1",
-    "@tanstack/react-query": "^4.28.0",
-    "@trpc/client": "^10.18.0",
-    "@trpc/next": "^10.18.0",
-    "@trpc/react-query": "^10.18.0",
-    "@trpc/server": "^10.18.0",
-    "ethers": "^5.7.2",
-    "next": "13.3.4",
-    "next-auth": "^4.21.0",
+    "@t3-oss/env-nextjs": "^0.7.1",
+    "@trpc/client": "^10.43.6",
+    "@trpc/next": "^10.43.6",
+    "@trpc/react-query": "^10.43.6",
+    "@trpc/server": "^10.43.6",
+    "next": "^14.0.4",
+    "next-auth": "^4.24.5",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "siwe": "^2.1.4",
-    "superjson": "1.12.2",
-    "wagmi": "^0.12.13",
-    "zod": "^3.21.4"
+    "server-only": "^0.0.1",
+    "superjson": "^2.2.1",
+    "viem": "2.x",
+    "wagmi": "^2.5.7",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/eslint": "^8.21.3",
-    "@types/node": "^18.15.5",
-    "@types/prettier": "^2.7.2",
-    "@types/react": "^18.0.28",
-    "@types/react-dom": "^18.0.11",
-    "@typescript-eslint/eslint-plugin": "^5.56.0",
-    "@typescript-eslint/parser": "^5.56.0",
+    "@types/eslint": "^8.44.7",
+    "@types/node": "^18.17.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
     "autoprefixer": "^10.4.14",
-    "eslint": "^8.36.0",
-    "eslint-config-next": "^13.2.4",
-    "postcss": "^8.4.21",
-    "prettier": "^2.8.6",
-    "prettier-plugin-tailwindcss": "^0.2.6",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5.0.2"
+    "eslint": "^8.54.0",
+    "eslint-config-next": "^14.0.4",
+    "postcss": "^8.4.31",
+    "prettier": "^3.1.0",
+    "prettier-plugin-tailwindcss": "^0.5.7",
+    "tailwindcss": "^3.3.5",
+    "typescript": "^5.1.6"
   },
   "ct3aMetadata": {
-    "initVersion": "7.12.2"
-  }
+    "initVersion": "7.26.0"
+  },
+  "packageManager": "yarn@1.22.19"
 }

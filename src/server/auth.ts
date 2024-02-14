@@ -1,21 +1,19 @@
-import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
-  type NextAuthOptions,
   type DefaultSession,
+  type NextAuthOptions,
 } from "next-auth";
 import { getCsrfToken } from "next-auth/react";
 import CredentialsProvider from "next-auth/providers/credentials";
-import {
-  fetchEnsName,
-  fetchEnsAvatar,
-  type FetchEnsNameArgs,
-  type FetchEnsAvatarArgs,
-} from "@wagmi/core";
-import { SiweMessage } from "siwe";
+import { getEnsAvatar, getEnsName } from "wagmi/actions";
+import { SiwViemMessage } from "@feelsgoodman/siwviem";
+import { type Address } from "viem";
+import { normalize } from "viem/ens";
 import Jazzicon from "@raugfer/jazzicon";
 
-import { env } from "y/env.mjs";
+import { env } from "~/env";
+
+import { config } from "~/app/config";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -25,8 +23,10 @@ import { env } from "y/env.mjs";
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
-    user?: {
-      address?: string;
+    user: {
+      address: string;
+      // ...other properties
+      // role: UserRole;
     } & DefaultSession["user"];
   }
 
@@ -42,22 +42,18 @@ declare module "next-auth" {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  session: {
-    strategy: "jwt",
-  },
-  secret: env.NEXTAUTH_SECRET,
   callbacks: {
     async session({ session, token }) {
       // TODO: anticipate empty token... what is the token etc
       if (session.user && token.sub) {
         session.user.address = token.sub;
         session.user.name =
-          (await fetchEnsName({ address: token.sub } as FetchEnsNameArgs)) ||
+          (await getEnsName(config, { address: token.sub as Address })) ??
           token.sub;
         session.user.image =
-          (await fetchEnsAvatar({
-            address: token.sub,
-          } as FetchEnsAvatarArgs)) ||
+          (await getEnsAvatar(config, {
+            name: normalize(session.user.name),
+          })) ??
           "data:image/svg+xml;base64," +
             Buffer.from(Jazzicon(token.sub), "utf8").toString("base64");
       }
@@ -81,12 +77,12 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          const siwe = new SiweMessage(
-            JSON.parse(credentials?.message || "{}") as SiweMessage
+          const siwe = new SiwViemMessage(
+            JSON.parse(credentials?.message ?? "{}") as SiwViemMessage,
           );
           const nextAuthUrl = new URL(env.NEXTAUTH_URL);
           const result = await siwe.verify({
-            signature: credentials?.signature || "",
+            signature: credentials?.signature ?? "",
             domain: nextAuthUrl.host,
             nonce: await getCsrfToken({ req: { headers: req.headers } }),
           });
@@ -109,9 +105,4 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export const getServerAuthSession = () => getServerSession(authOptions);
